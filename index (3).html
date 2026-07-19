@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgriVoice AI — Crop Doctor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --soil: #2B1F14;
+    --leaf: #4C7A3D;
+    --leaf-light: #6B9A56;
+    --ochre: #D9A441;
+    --paper: #F2E9D8;
+    --paper-dim: #E8DCC4;
+    --rust: #B5502E;
+    --ink: #1C1810;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(43,31,20,0.06) 1px, transparent 0);
+    background-size: 22px 22px;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 48px; flex-wrap: wrap; gap: 12px; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-mark { width: 34px; height: 34px; flex-shrink: 0; }
+  .brand-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px; letter-spacing: -0.01em; }
+  nav.lang { display: flex; gap: 6px; background: var(--paper-dim); padding: 4px; border-radius: 999px; border: 1px solid rgba(43,31,20,0.15); }
+  nav.lang button {
+    font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 0.02em;
+    padding: 6px 12px; border-radius: 999px; border: none; background: transparent; color: var(--ink);
+    cursor: pointer; opacity: 0.55; transition: all 0.2s;
+  }
+  nav.lang button.active { background: var(--soil); color: var(--paper); opacity: 1; }
+
+  .hero { margin-bottom: 40px; }
+  .eyebrow { font-family: 'Space Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--leaf); margin-bottom: 12px; }
+  h1 { font-family: 'Fraunces', serif; font-weight: 700; font-size: clamp(32px, 5vw, 48px); line-height: 1.05; letter-spacing: -0.02em; max-width: 640px; }
+  .sub { margin-top: 14px; font-size: 16px; color: rgba(28,24,16,0.68); max-width: 520px; line-height: 1.5; }
+
+  .scan-card {
+    background: var(--soil);
+    border-radius: 20px;
+    padding: 4px;
+    position: relative;
+    box-shadow: 0 20px 50px -20px rgba(43,31,20,0.4);
+  }
+  .scan-inner {
+    background: var(--ink);
+    border-radius: 16px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+    min-height: 260px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 1px dashed rgba(242,233,216,0.25);
+  }
+  .scan-inner.has-image { padding: 0; min-height: auto; }
+  .scan-inner img { width: 100%; max-height: 340px; object-fit: cover; display: block; border-radius: 14px; }
+  .drop-icon { width: 46px; height: 46px; color: var(--ochre); margin-bottom: 16px; }
+  .drop-label { color: var(--paper); font-family: 'Fraunces', serif; font-size: 20px; margin-bottom: 6px; }
+  .drop-hint { color: rgba(242,233,216,0.55); font-size: 13px; }
+  .file-input { display: none; }
+
+  .scanline {
+    position: absolute; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--ochre), transparent);
+    box-shadow: 0 0 12px 2px var(--ochre);
+    animation: scan 1.6s ease-in-out infinite;
+    display: none;
+  }
+  .scanning .scanline { display: block; }
+  @keyframes scan { 0% { top: 6%; } 50% { top: 92%; } 100% { top: 6%; } }
+  .scanning .drop-label::after { content: '...'; }
+
+  .controls-row { display: flex; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+  .btn {
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px;
+    padding: 13px 22px; border-radius: 10px; border: none; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px; transition: transform 0.15s, opacity 0.15s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--leaf); color: var(--paper); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-ghost { background: transparent; color: var(--soil); border: 1.5px solid rgba(43,31,20,0.25); }
+
+  textarea.symptoms {
+    width: 100%; margin-top: 16px; font-family: 'Inter', sans-serif; font-size: 14px;
+    padding: 14px 16px; border-radius: 10px; border: 1.5px solid rgba(43,31,20,0.18);
+    background: var(--paper-dim); resize: vertical; min-height: 60px; color: var(--ink);
+  }
+  textarea.symptoms::placeholder { color: rgba(28,24,16,0.4); }
+
+  .report {
+    margin-top: 40px;
+    background: var(--paper-dim);
+    border: 1px solid rgba(43,31,20,0.15);
+    border-radius: 16px;
+    padding: 32px;
+    display: none;
+  }
+  .report.show { display: block; animation: fadein 0.4s ease; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(8px);} to { opacity: 1; transform: translateY(0);} }
+  .report-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px dashed rgba(43,31,20,0.25); padding-bottom: 16px; margin-bottom: 20px; }
+  .report-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 24px; }
+  .report-tag { font-family: 'Space Mono', monospace; font-size: 11px; background: var(--rust); color: var(--paper); padding: 4px 10px; border-radius: 6px; }
+  .report-tag.healthy { background: var(--leaf); }
+  .field-no { font-family: 'Space Mono', monospace; font-size: 11px; color: rgba(28,24,16,0.45); }
+
+  .report-section { margin-bottom: 18px; }
+  .report-section h3 { font-family: 'Space Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--leaf); margin-bottom: 8px; }
+  .report-section p, .report-section li { font-size: 15px; line-height: 1.6; color: var(--ink); }
+  .report-section ul { padding-left: 20px; }
+
+  .footer-note { margin-top: 32px; font-size: 12.5px; color: rgba(28,24,16,0.45); line-height: 1.6; }
+  .key-setup { margin-top: 40px; font-size: 13px; color: rgba(28,24,16,0.6); background: var(--paper-dim); padding: 16px 18px; border-radius: 10px; border: 1px solid rgba(43,31,20,0.1); }
+  .key-setup input { font-family: 'Space Mono', monospace; font-size: 12px; width: 100%; margin-top: 8px; padding: 8px 10px; border-radius: 6px; border: 1px solid rgba(43,31,20,0.2); background: var(--paper); }
+  .key-setup a { color: var(--leaf); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 40 40" fill="none">
+        <path d="M20 4C20 4 8 10 8 22C8 29.7 13.4 36 20 36C26.6 36 32 29.7 32 22C32 10 20 4 20 4Z" fill="#4C7A3D"/>
+        <path d="M20 10V32" stroke="#F2E9D8" stroke-width="1.5"/>
+        <path d="M20 16L14 12M20 22L26 18M20 28L14 24" stroke="#F2E9D8" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span class="brand-name">AgriVoice AI</span>
+    </div>
+    <nav class="lang" id="langSwitch">
+      <button data-lang="en" class="active">EN</button>
+      <button data-lang="hi">हिं</button>
+      <button data-lang="ta">தமிழ்</button>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <div class="eyebrow">Field Report — Crop Health</div>
+    <h1 id="heroTitle">Photograph the leaf. Know the disease. Save the harvest.</h1>
+    <p class="sub" id="heroSub">Upload a photo of any crop leaf and describe what you're seeing. Get an instant diagnosis, a treatment plan, and prevention tips — in your language.</p>
+  </div>
+
+  <div class="scan-card">
+    <div class="scan-inner" id="scanInner">
+      <div class="scanline"></div>
+      <svg class="drop-icon" viewBox="0 0 48 48" fill="none">
+        <path d="M24 6L24 30M24 6L15 15M24 6L33 15" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M8 30V38C8 40.2 9.8 42 12 42H36C38.2 42 40 40.2 40 38V30" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <div class="drop-label" id="dropLabel">Tap to add a leaf photo</div>
+      <div class="drop-hint" id="dropHint">JPG or PNG · works best in daylight, close-up on the leaf</div>
+      <input type="file" accept="image/*" capture="environment" class="file-input" id="fileInput">
+    </div>
+  </div>
+
+  <textarea class="symptoms" id="symptoms" placeholder="Optional: describe what you notice — yellow spots, wilting, curling leaves, insects..."></textarea>
+
+  <div class="controls-row">
+    <button class="btn btn-primary" id="diagnoseBtn" disabled>Diagnose crop</button>
+    <button class="btn btn-ghost" id="resetBtn">Start over</button>
+  </div>
+
+  <div class="report" id="report">
+    <div class="report-header">
+      <div>
+        <div class="field-no" id="fieldNo">FIELD REPORT #001</div>
+        <div class="report-title" id="reportTitle">—</div>
+      </div>
+      <div class="report-tag" id="reportTag">—</div>
+    </div>
+    <div class="report-section">
+      <h3>What's happening</h3>
+      <p id="repDiagnosis">—</p>
+    </div>
+    <div class="report-section">
+      <h3>Treatment plan</h3>
+      <ul id="repTreatment"></ul>
+    </div>
+    <div class="report-section">
+      <h3>Prevent it next season</h3>
+      <ul id="repPrevention"></ul>
+    </div>
+    <div class="footer-note">AI-generated guidance — always confirm with your local agricultural extension office before applying chemical treatments.</div>
+  </div>
+
+  <div class="key-setup" id="keySetup">
+    <strong>Setup (one-time):</strong> This demo calls the Google Gemini API directly from the browser.
+    Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a>, paste it below, and it'll be remembered for this session.
+    <input type="password" id="apiKeyInput" placeholder="Paste your Gemini API key here">
+  </div>
+</div>
+
+<script>
+const translations = {
+  en: { title: "Photograph the leaf. Know the disease. Save the harvest.", sub: "Upload a photo of any crop leaf and describe what you're seeing. Get an instant diagnosis, a treatment plan, and prevention tips — in your language.", drop: "Tap to add a leaf photo", btn: "Diagnose crop" },
+  hi: { title: "पत्ती की फोटो लें। बीमारी पहचानें। फसल बचाएं।", sub: "किसी भी फसल की पत्ती की फोटो अपलोड करें और बताएं क्या दिख रहा है। तुरंत निदान, उपचार योजना और बचाव के सुझाव पाएं।", drop: "पत्ती की फोटो जोड़ने के लिए टैप करें", btn: "फसल की जांच करें" },
+  ta: { title: "இலையைப் புகைப்படம் எடுங்கள். நோயை அறியுங்கள்.", sub: "எந்த பயிர் இலையின் புகைப்படத்தையும் பதிவேற்றி நீங்கள் பார்ப்பதை விவரிக்கவும். உடனடி நோய் கண்டறிதல் மற்றும் சிகிச்சை திட்டம் பெறுங்கள்.", drop: "இலை புகைப்படத்தைச் சேர்க்க தட்டவும்", btn: "பயிரை பரிசோதிக்கவும்" }
+};
+let currentLang = 'en';
+document.getElementById('langSwitch').addEventListener('click', (e) => {
+  if (e.target.tagName !== 'BUTTON') return;
+  currentLang = e.target.dataset.lang;
+  document.querySelectorAll('.lang button').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  const t = translations[currentLang];
+  document.getElementById('heroTitle').textContent = t.title;
+  document.getElementById('heroSub').textContent = t.sub;
+  document.getElementById('dropLabel').textContent = t.drop;
+  document.getElementById('diagnoseBtn').textContent = t.btn;
+});
+
+const scanInner = document.getElementById('scanInner');
+const fileInput = document.getElementById('fileInput');
+const diagnoseBtn = document.getElementById('diagnoseBtn');
+let imageBase64 = null;
+let reportCount = 0;
+
+scanInner.addEventListener('click', () => { if (!imageBase64) fileInput.click(); });
+fileInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    imageBase64 = ev.target.result.split(',')[1];
+    scanInner.classList.add('has-image');
+    scanInner.innerHTML = `<img src="${ev.target.result}">`;
+    diagnoseBtn.disabled = false;
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => location.reload());
+
+diagnoseBtn.addEventListener('click', async () => {
+  const apiKey = document.getElementById('apiKeyInput').value.trim();
+  if (!apiKey) { alert('Paste your Gemini API key in the setup box below first.'); return; }
+  if (!imageBase64) return;
+
+  const symptoms = document.getElementById('symptoms').value;
+  scanInner.classList.add('scanning');
+  diagnoseBtn.disabled = true;
+  diagnoseBtn.textContent = 'Analyzing...';
+
+  const langName = { en: 'English', hi: 'Hindi', ta: 'Tamil' }[currentLang];
+  const prompt = `You are an expert agronomist. Look at this crop leaf photo. Farmer's notes: "${symptoms || 'none provided'}".
+Respond ONLY in valid JSON, no markdown, no backticks, in ${langName}, with this exact structure:
+{"healthy": boolean, "diseaseName": "short name or 'Healthy'", "diagnosis": "2-3 sentence explanation of what you see and why", "treatment": ["step 1", "step 2", "step 3"], "prevention": ["tip 1", "tip 2", "tip 3"]}`;
+
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            { text: prompt },
+            { inline_data: { mime_type: 'image/jpeg', data: imageBase64 } }
+          ]
+        }]
+      })
+    });
+    const data = await response.json();
+    if (!response.ok || data.error) {
+      throw new Error(data.error?.message || `API returned status ${response.status}`);
+    }
+    if (!data.candidates || !data.candidates[0]) {
+      throw new Error('No response from model — it may have blocked the image or request. Try a different photo.');
+    }
+    let text = data.candidates[0].content.parts[0].text;
+    text = text.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(text);
+
+    reportCount++;
+    document.getElementById('fieldNo').textContent = `FIELD REPORT #${String(reportCount).padStart(3, '0')}`;
+    document.getElementById('reportTitle').textContent = result.diseaseName;
+    const tag = document.getElementById('reportTag');
+    tag.textContent = result.healthy ? 'HEALTHY' : 'ACTION NEEDED';
+    tag.className = 'report-tag' + (result.healthy ? ' healthy' : '');
+    document.getElementById('repDiagnosis').textContent = result.diagnosis;
+    document.getElementById('repTreatment').innerHTML = result.treatment.map(t => `<li>${t}</li>`).join('');
+    document.getElementById('repPrevention').innerHTML = result.prevention.map(t => `<li>${t}</li>`).join('');
+    document.getElementById('report').classList.add('show');
+    document.getElementById('report').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } catch (err) {
+    alert('Something went wrong: ' + err.message + '\n\nCheck your API key and try again.');
+  } finally {
+    scanInner.classList.remove('scanning');
+    diagnoseBtn.disabled = false;
+    diagnoseBtn.textContent = translations[currentLang].btn;
+  }
+});
+</script>
+</body>
+</html>
