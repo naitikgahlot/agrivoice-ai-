@@ -49,6 +49,5 @@ The app has no backend to maintain or scale — it's a static page that calls an
 
 AI-generated guidance is a starting point — always confirm with a local agricultural extension office before applying chemical treatments.
 
-## Team
 
-*(add your names here)*
+Naitik Gahlot
