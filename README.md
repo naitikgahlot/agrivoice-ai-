@@ -4,7 +4,7 @@
 
 AgriVoice AI lets a farmer photograph a crop leaf, describe what they're seeing, and get an instant diagnosis, treatment plan, and prevention tips — in their own language. No app install, no account, works on any phone browser.
 
-**[Live Demo](#)** — *(replace with your Netlify link)*
+*[Live Demo](https://amazing-rabanadas-981801.netlify.app/)
 
 ## The Problem
 
@@ -44,10 +44,6 @@ The app has no backend to maintain or scale — it's a static page that calls an
 - Offline mode for low-connectivity areas
 - Field history tracking per farmer/plot
 - Integration with local weather data to time treatments
-
-## Disclaimer
-
-AI-generated guidance is a starting point — always confirm with a local agricultural extension office before applying chemical treatments.
 
 
 Naitik Gahlot
